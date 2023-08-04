@@ -61,12 +61,14 @@ public class LogAspect {
         Method method = methodSignature.getMethod();
         OperateLog annotation = method.getAnnotation(OperateLog.class);
         // 获取用户信息
-        LogDO logDO = EntityUtil.changeEntity(LogDO.class, annotation);
+        LogDO logDO = new LogDO();
+        logDO.setType(annotation.type().getName());
+        logDO.setOperateName(annotation.operateName());
+        logDO.setOperateContent(annotation.operateContent());
         // 模拟获取当前用户
         String operatorName = operatorService.getOperatorName();
         logDO.setUserName(operatorName);
-
-
+        
         // 获取当前时间
         LocalDateTime nowTime = LocalDateTime.now();
         String formatNowTime = nowTime.format(DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"));
@@ -75,7 +77,6 @@ public class LogAspect {
         //获取方法参数值
         Object[] args = joinPoint.getArgs();
         
-
         //保存日志
         recordLogService.insertLog(logDO);
     }
