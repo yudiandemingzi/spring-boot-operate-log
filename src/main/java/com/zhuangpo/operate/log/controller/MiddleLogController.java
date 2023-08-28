@@ -17,7 +17,7 @@ public class MiddleLogController {
     }
 
     @PostMapping (value = "/saveUser")
-    @MiddleLog(type = "新增", operateName = "新增用户", operateContent = "新增加了一个用户,用户名为{{#userDto.userName}}")
+    @MiddleLog(type = "新增", operateName = "新增用户", operateContent = "新增加了一个用户,用户名为{{#dto.userName}}")
     public String createUser(@RequestBody UserDTO dto) {
         return "成功";
     }

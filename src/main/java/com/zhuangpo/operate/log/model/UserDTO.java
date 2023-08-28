@@ -8,7 +8,6 @@ import lombok.Data;
  * @author xub
  * @since 2023/8/2 上午9:53
  */
-@Data
 public class UserDTO {
 
     /**
@@ -20,4 +19,20 @@ public class UserDTO {
      * 用户姓名
      */
     private String userName;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 }
