@@ -11,7 +11,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class LogDO {
+public class LogDTO {
 
     /**
      * 主键

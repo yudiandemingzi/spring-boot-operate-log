@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2023/8/2 上午9:53
  */
 @Data
-public class UserDO {
+public class UserDTO {
 
     /**
      * 用户id

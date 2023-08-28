@@ -1,6 +1,6 @@
 package com.zhuangpo.operate.log.service;
 
-import com.zhuangpo.operate.log.model.LogDO;
+import com.zhuangpo.operate.log.model.LogDTO;
 
 /**
  * 插入日志
@@ -13,8 +13,8 @@ public interface RecordLogService {
     /**
      * 插入日志
      *
-     * @param logDO 日志信息
+     * @param logDTO 日志信息
      * @return Void
      */
-    void insertLog(LogDO logDO);
+    void insertLog(LogDTO logDTO);
 }

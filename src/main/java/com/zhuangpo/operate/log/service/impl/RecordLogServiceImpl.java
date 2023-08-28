@@ -1,8 +1,7 @@
 package com.zhuangpo.operate.log.service.impl;
 
 
-import com.zhuangpo.operate.log.model.LogDO;
-import com.zhuangpo.operate.log.service.OperatorService;
+import com.zhuangpo.operate.log.model.LogDTO;
 import com.zhuangpo.operate.log.service.RecordLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ public class RecordLogServiceImpl implements RecordLogService {
 
 
     @Override
-    public void insertLog(LogDO logDO) {
-        log.info("日志操作记录------ {}",logDO);
+    public void insertLog(LogDTO logDTO) {
+        log.info("日志操作记录------ {}", logDTO);
     }
 }
