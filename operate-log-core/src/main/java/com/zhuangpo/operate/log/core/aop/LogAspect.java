@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.zhuangpo.operate.log.core.handle.OperateLogExpressionEvaluator;
 import com.zhuangpo.operate.log.core.pojo.OperateLogDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,7 +17,11 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 日志切面
@@ -61,9 +66,8 @@ public class LogAspect {
         Object[] args = joinPoint.getArgs();
         Object target = joinPoint.getTarget();
         Class<?> targetClass = AopUtils.getTargetClass(target);
-        // 1 定义解析器
         OperateLog annotation = method.getAnnotation(OperateLog.class);
-        OperateLogDTO logDTO = changeLogAnnotation(annotation);
+        OperateLogDTO logDTO = this.changeLogAnnotation(annotation);
         Object proceed = null;
         Throwable throwable = null;
         try {
@@ -87,7 +91,8 @@ public class LogAspect {
     }
 
     private OperateLogDTO process(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj, String errorMsg, Map<String, String> optContext) {
-       List<String> templates = Lists.newArrayList(logDTO.getOperator(),logDTO.getBizNo(),logDTO.getOperateContent());
+        List<String> templates = Lists.newArrayList(logDTO.getOperator(), logDTO.getBizNo(), logDTO.getOperateContent());
+        templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
         Map<String, String> process = process(templates, targetClass, method, args, retObj, errorMsg, optContext);
         logDTO.setOperator(process.get(logDTO.getOperator()));
         logDTO.setBizNo(process.get(logDTO.getBizNo()));
@@ -98,26 +103,31 @@ public class LogAspect {
         return logDTO;
     }
 
-    private Map<String, String> process(Collection<String> templates, Class<?> targetClass, Method method, Object[] args, Object retObj, String errorMsg, Map<String, String> optContext) {
+    /**
+     * @param
+     * @return
+     */
+    private Map<String, String> process(Collection<String> templates,
+                                        Class<?> targetClass,
+                                        Method method,
+                                        Object[] args,
+                                        Object retObj,
+                                        String errorMsg,
+                                        Map<String, String> optContext) {
         Map<String, String> expressionValues = new HashMap<>(16);
         EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args, retObj, errorMsg, optContext);
         for (String tpl : templates) {
-            if (tpl == null || tpl.isEmpty()) {
-                expressionValues.put(tpl, tpl);
-                continue;
-            }
+            expressionValues.put(tpl, tpl);
             AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(method, targetClass);
             try {
                 String value = expressionEvaluator.parseExpression(evaluationContext, annotatedElementKey, tpl);
                 expressionValues.put(tpl, value);
             } catch (Exception e) {
-                expressionValues.put(tpl, tpl);
-                log.error("解析操作日志SpEL【" + tpl + "】错误，" + e.getMessage());
+                log.info("解析操作日志SpEL出错 ={}", e.getMessage());
             }
         }
         return expressionValues;
     }
-
 
     /**
      * OperateLog注解转成对应实体
@@ -135,6 +145,4 @@ public class LogAspect {
         operateLogDTO.setCondition(log.condition());
         return operateLogDTO;
     }
-
-
 }
