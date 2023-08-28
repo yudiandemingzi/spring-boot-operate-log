@@ -1,6 +1,7 @@
-package com.zhuangpo.operate.log.annotation;
+package com.zhuangpo.operate.log.core.aop;
 
-import com.zhuangpo.operate.log.enums.OperateEnum;
+
+import com.zhuangpo.operate.log.core.enums.OperateEnum;
 
 import java.lang.annotation.*;
 
@@ -32,14 +33,14 @@ public @interface OperateLog {
     String bizNo() default "";
 
     /**
-     * 操作事件名称
+     * 操作事件名称(接口名称)
      */
-    String operateName() default "";
+    String operateName();
 
     /**
      * 比较详细的一条操作日志 比如某某订单已经发货
      */
-    String operateContent() default "";
+    String operateContent();
 
     /**
      * 记录条件 默认 true

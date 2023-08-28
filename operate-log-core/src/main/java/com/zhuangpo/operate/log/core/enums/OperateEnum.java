@@ -1,8 +1,8 @@
-package com.zhuangpo.operate.log.enums;
+package com.zhuangpo.operate.log.core.enums;
 
 /**
- *  操作类型
- * 
+ * 操作类型
+ *
  * @author xub
  * @since 2023/8/4 上午10:00
  */
