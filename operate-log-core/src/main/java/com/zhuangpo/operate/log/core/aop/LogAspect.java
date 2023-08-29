@@ -2,6 +2,7 @@ package com.zhuangpo.operate.log.core.aop;
 
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.zhuangpo.operate.log.core.handle.OperateLogExpressionEvaluator;
 import com.zhuangpo.operate.log.core.pojo.OperateLogDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -63,36 +64,22 @@ public class LogAspect {
         // 获取切点方法上的注解
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
-        Object[] args = joinPoint.getArgs();
-        Object target = joinPoint.getTarget();
-        Class<?> targetClass = AopUtils.getTargetClass(target);
         OperateLog annotation = method.getAnnotation(OperateLog.class);
-        OperateLogDTO logDTO = this.changeLogAnnotation(annotation);
-        Object proceed = joinPoint.proceed();
-        this.records(logDTO, targetClass, method, args, proceed);
+        this.records(annotation, joinPoint);
     }
 
 
-    private void records(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj) {
-        try {
-
-            Map<String, String> optContext = new HashMap<>();
-            this.process(logDTO, targetClass, method, args, retObj, optContext);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-    }
-
-    private OperateLogDTO process(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj, Map<String, String> optContext) {
-        List<String> templates = Lists.newArrayList(logDTO.getOperator(), logDTO.getBizNo(), logDTO.getOperateContent());
+    private OperateLogDTO records(OperateLog annotation, ProceedingJoinPoint joinPoint) throws Throwable {
+        HashMap<String, String> optContext = Maps.newHashMap();
+        List<String> templates = Lists.newArrayList(annotation.operator(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
-        Map<String, String> process = process(templates, targetClass, method, args, retObj, optContext);
-        logDTO.setOperator(process.get(logDTO.getOperator()));
-        logDTO.setBizNo(process.get(logDTO.getBizNo()));
-        logDTO.setOperateName(process.get(logDTO.getOperateName()));
-        logDTO.setOperateContent(process.get(logDTO.getOperateContent()));
-        logDTO.setCondition(process.get(logDTO.getCondition()));
+        Map<String, String> process = this.process(templates, joinPoint, optContext);
+        OperateLogDTO logDTO = new OperateLogDTO();
+        logDTO.setType(annotation.type().getName());
+        logDTO.setOperator(process.get(annotation.operator()));
+        logDTO.setBizNo(process.get(annotation.bizNo()));
+        logDTO.setOperateName(annotation.operateName());
+        logDTO.setOperateContent(process.get(annotation.operateContent()));
         log.info("查看最终日志 =  {},", logDTO);
         return logDTO;
     }
@@ -102,13 +89,17 @@ public class LogAspect {
      * @return
      */
     private Map<String, String> process(Collection<String> templates,
-                                        Class<?> targetClass,
-                                        Method method,
-                                        Object[] args,
-                                        Object retObj,
-                                        Map<String, String> optContext) {
+                                        ProceedingJoinPoint joinPoint,
+                                        Map<String, String> optContext) throws Throwable {
         Map<String, String> expressionValues = new HashMap<>(16);
-        EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args, retObj, optContext);
+        // 获取切点方法上的注解
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        Object[] args = joinPoint.getArgs();
+        Object target = joinPoint.getTarget();
+        Class<?> targetClass = AopUtils.getTargetClass(target);
+        Object proceed = joinPoint.proceed();
+        EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args, proceed, optContext);
         for (String tpl : templates) {
             expressionValues.put(tpl, tpl);
             AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(method, targetClass);
@@ -120,22 +111,5 @@ public class LogAspect {
             }
         }
         return expressionValues;
-    }
-
-    /**
-     * OperateLog注解转成对应实体
-     *
-     * @param log 注解属性
-     * @return 实体属性
-     */
-    private OperateLogDTO changeLogAnnotation(OperateLog log) {
-        OperateLogDTO operateLogDTO = new OperateLogDTO();
-        operateLogDTO.setOperator(log.operator());
-        operateLogDTO.setType(log.type());
-        operateLogDTO.setBizNo(log.bizNo());
-        operateLogDTO.setOperateName(log.operateName());
-        operateLogDTO.setOperateContent(log.operateContent());
-        operateLogDTO.setCondition(log.condition());
-        return operateLogDTO;
     }
 }

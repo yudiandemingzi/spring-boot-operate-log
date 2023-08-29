@@ -1,6 +1,5 @@
 package com.zhuangpo.operate.log.core.pojo;
 
-import com.zhuangpo.operate.log.core.enums.OperateEnum;
 import lombok.Data;
 import lombok.ToString;
 
@@ -22,7 +21,7 @@ public class OperateLogDTO {
     /**
      * 操作方式
      */
-    private OperateEnum type;
+    private String type;
 
     /**
      * 关联的业务id(订单号、业务编号)
@@ -40,7 +39,12 @@ public class OperateLogDTO {
     private String operateContent;
 
     /**
-     * 记录条件 默认 true
+     * 是否成功 true:是，flase:否
      */
-    private String condition;
+    private Boolean status;
+
+    /**
+     * 错误原因
+     */
+    private String errMsg;
 }
