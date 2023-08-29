@@ -16,10 +16,9 @@ public class OperateLogEvaluationContext extends MethodBasedEvaluationContext {
 
     public OperateLogEvaluationContext(Object rootObject, Method method, Object[] arguments,
                                        ParameterNameDiscoverer parameterNameDiscoverer,
-                                       Object retObj, String errorMsg, Map<String, String> optContext) {
+                                       Object retObj,Map<String, String> optContext) {
         super(rootObject, method, arguments, parameterNameDiscoverer);
         setVariable("_retObj", retObj);
-        setVariable("_errorMsg", errorMsg);
         setVariable("_context", optContext);
     }
 }

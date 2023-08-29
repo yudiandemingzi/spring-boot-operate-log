@@ -49,7 +49,7 @@ public class LogAspect {
      * @param joinPoint
      */
     @Around("pointcutLog()")
-    public void afterReturning(ProceedingJoinPoint joinPoint) {
+    public void afterReturning(ProceedingJoinPoint joinPoint) throws Throwable {
         insertLog(joinPoint);
     }
 
@@ -59,7 +59,7 @@ public class LogAspect {
      *
      * @param joinPoint
      */
-    private void insertLog(ProceedingJoinPoint joinPoint) {
+    private void insertLog(ProceedingJoinPoint joinPoint) throws Throwable {
         // 获取切点方法上的注解
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
@@ -68,32 +68,26 @@ public class LogAspect {
         Class<?> targetClass = AopUtils.getTargetClass(target);
         OperateLog annotation = method.getAnnotation(OperateLog.class);
         OperateLogDTO logDTO = this.changeLogAnnotation(annotation);
-        Object proceed = null;
-        Throwable throwable = null;
-        try {
-            proceed = joinPoint.proceed();
-        } catch (Throwable e) {
-            throwable = e;
-        }
-        this.records(logDTO, targetClass, method, args, proceed, throwable);
+        Object proceed = joinPoint.proceed();
+        this.records(logDTO, targetClass, method, args, proceed);
     }
 
 
-    private void records(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj, Throwable throwable) {
+    private void records(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj) {
         try {
 
             Map<String, String> optContext = new HashMap<>();
-            this.process(logDTO, targetClass, method, args, retObj, throwable == null ? null : throwable.getMessage(), optContext);
+            this.process(logDTO, targetClass, method, args, retObj, optContext);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
     }
 
-    private OperateLogDTO process(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj, String errorMsg, Map<String, String> optContext) {
+    private OperateLogDTO process(OperateLogDTO logDTO, Class<?> targetClass, Method method, Object[] args, Object retObj, Map<String, String> optContext) {
         List<String> templates = Lists.newArrayList(logDTO.getOperator(), logDTO.getBizNo(), logDTO.getOperateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
-        Map<String, String> process = process(templates, targetClass, method, args, retObj, errorMsg, optContext);
+        Map<String, String> process = process(templates, targetClass, method, args, retObj, optContext);
         logDTO.setOperator(process.get(logDTO.getOperator()));
         logDTO.setBizNo(process.get(logDTO.getBizNo()));
         logDTO.setOperateName(process.get(logDTO.getOperateName()));
@@ -112,10 +106,9 @@ public class LogAspect {
                                         Method method,
                                         Object[] args,
                                         Object retObj,
-                                        String errorMsg,
                                         Map<String, String> optContext) {
         Map<String, String> expressionValues = new HashMap<>(16);
-        EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args, retObj, errorMsg, optContext);
+        EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args, retObj, optContext);
         for (String tpl : templates) {
             expressionValues.put(tpl, tpl);
             AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(method, targetClass);

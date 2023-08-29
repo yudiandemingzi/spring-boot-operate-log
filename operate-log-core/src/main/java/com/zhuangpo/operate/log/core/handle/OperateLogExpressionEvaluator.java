@@ -17,9 +17,9 @@ public class OperateLogExpressionEvaluator extends CachedExpressionEvaluator {
 
 
     public EvaluationContext createEvaluationContext(Class<?> targetClass, Method method, Object[] args,
-                                                     Object retObj, String errorMsg, Map<String, String> optContext) {
+                                                     Object retObj, Map<String, String> optContext) {
         Method targetMethod = getTargetMethod(targetClass, method);
-        return new OperateLogEvaluationContext(null, targetMethod, args, getParameterNameDiscoverer(), retObj, errorMsg, optContext);
+        return new OperateLogEvaluationContext(null, targetMethod, args, getParameterNameDiscoverer(), retObj, optContext);
     }
 
 
