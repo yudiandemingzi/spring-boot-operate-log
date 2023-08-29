@@ -87,14 +87,14 @@ public class LogAspect {
      */
     private OperateLogDTO recordLog(OperateLog annotation, ProceedingJoinPoint joinPoint) {
         //获取存在Spel表达式的属性
-        List<String> templates = Lists.newArrayList(annotation.operator(), annotation.bizNo(), annotation.operateContent());
+        List<String> templates = Lists.newArrayList(annotation.operator(),annotation.operateName(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
         Map<String, String> process = this.process(templates, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
         logDTO.setType(annotation.type().getName());
         logDTO.setOperator(process.get(annotation.operator()));
         logDTO.setBizNo(process.get(annotation.bizNo()));
-        logDTO.setOperateName(annotation.operateName());
+        logDTO.setOperateName(process.get(annotation.operateName()));
         logDTO.setOperateContent(process.get(annotation.operateContent()));
         return logDTO;
     }
