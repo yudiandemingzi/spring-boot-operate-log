@@ -1,12 +1,15 @@
 package com.zhuangpo.operate.log.core.aop;
 
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.zhuangpo.operate.log.core.handle.OperateLogExpressionEvaluator;
 import com.zhuangpo.operate.log.core.pojo.OperateLogDTO;
 import com.zhuangpo.operate.log.core.service.RecordLogService;
 import com.zhuangpo.operate.log.core.service.UserService;
+import com.zhuangpo.operate.log.core.util.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -58,7 +62,7 @@ public class LogAspect {
      * @param joinPoint
      */
     @Around("pointcutLog()")
-    public void afterReturning(ProceedingJoinPoint joinPoint) {
+    public void afterReturning(ProceedingJoinPoint joinPoint) throws Throwable {
         insertLog(joinPoint);
     }
 
@@ -68,12 +72,23 @@ public class LogAspect {
      *
      * @param joinPoint
      */
-    private void insertLog(ProceedingJoinPoint joinPoint) {
+    private void insertLog(ProceedingJoinPoint joinPoint) throws Throwable {
         // 获取切点方法上的注解
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
         OperateLog annotation = method.getAnnotation(OperateLog.class);
         OperateLogDTO operateLogDTO = this.recordLog(annotation, joinPoint);
+        //如果是系统异常那就直接抛出异常也不不需要记录日志，但如果哦是业务异常，那就用记录这个日志是否成功
+        Object proceed = joinPoint.proceed();
+        JSONObject jsonObject = JSONUtil.parseObj(proceed);
+        Integer code = (Integer) jsonObject.get("code");
+        String message = (String) jsonObject.get("message");
+        if (Objects.equals(ResultCode.SUCCESS.getCode(), code)) {
+            operateLogDTO.setStatus(Boolean.TRUE);
+        } else {
+            operateLogDTO.setStatus(Boolean.FALSE);
+            operateLogDTO.setErrMsg(message);
+        }
         CompletableFuture.runAsync(() ->
                 recordLogService.insertLog(operateLogDTO)
         );
@@ -87,7 +102,7 @@ public class LogAspect {
      */
     private OperateLogDTO recordLog(OperateLog annotation, ProceedingJoinPoint joinPoint) {
         //获取存在Spel表达式的属性
-        List<String> templates = Lists.newArrayList(annotation.operator(),annotation.operateName(), annotation.bizNo(), annotation.operateContent());
+        List<String> templates = Lists.newArrayList(annotation.operator(), annotation.operateName(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
         Map<String, String> process = this.process(templates, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
