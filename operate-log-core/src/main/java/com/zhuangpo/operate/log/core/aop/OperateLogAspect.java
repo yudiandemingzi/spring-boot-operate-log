@@ -75,7 +75,7 @@ public class OperateLogAspect {
         Method method = methodSignature.getMethod();
         OperateLog annotation = method.getAnnotation(OperateLog.class);
         OperateLogDTO operateLogDTO = this.recordLog(annotation, joinPoint);
-        //如果是系统异常那就直接抛出异常也不不需要记录日志，但如果哦是业务异常，那就用记录这个日志是否成功
+        //如果是系统异常那就直接抛出异常也不需要记录日志，但如果是业务异常，那就用记录这个日志是否成功
         Object proceed = joinPoint.proceed();
         JSONObject jsonObject = JSONUtil.parseObj(proceed);
         Integer code = (Integer) jsonObject.get("code");
@@ -102,8 +102,8 @@ public class OperateLogAspect {
         //获取存在Spel表达式的属性
         List<String> templates = Lists.newArrayList(annotation.operator(), annotation.operateName(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
-        HashMap<String, String> process = logSpelProcess.processBeforeExec(templates, joinPoint);
-        process = logSpelProcess.ternaryProcess(process, joinPoint);
+        HashMap<String, String> processMap = logSpelProcess.processBeforeExec(templates, joinPoint);
+        HashMap<String, String> process = logSpelProcess.ternaryProcess(processMap, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
         logDTO.setType(annotation.type().getName());
         logDTO.setOperator(userService.getUserName());

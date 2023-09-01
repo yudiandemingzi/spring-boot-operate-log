@@ -40,7 +40,7 @@ public class LogSpelProcess {
     public LogSpelProcess(FunctionService customFunctionService) {
         this.customFunctionService = customFunctionService;
     }
-    
+
 
     /**
      * key 为字段未SPEL解析属性, value为已解析的属性，如果解析失败依旧是未解析属性
@@ -65,20 +65,26 @@ public class LogSpelProcess {
             map.put(template, template);
             //这里定义规则 如果存在[,就代表需要执行函数方法
             if (template.contains("[")) {
+                //正则匹配方法
                 Matcher matcher = PATTERN_METHOD.matcher(template);
                 while (matcher.find()) {
-                    // getUserNameByUserId{#userId}
+                    //获取方法名称 例:getUserNameByUserId{#userId}
                     String funcName = matcher.group(1);
+                    //正则匹配属性
                     Matcher patternAttribute = PATTERN_ATTRIBUTE.matcher(funcName);
                     String paramName = null;
                     if (patternAttribute.find()) {
+                        //获取属性SPEL 例: #userId
                         paramName = patternAttribute.group(1);
                     }
+                    //变成getUserNameByUserId
                     funcName = StrUtil.subBefore(funcName, "{", Boolean.FALSE);
                     if (customFunctionService.executeBefore(funcName)) {
+                        //获取属性值
                         Object value = cachedExpressionEvaluator.parseExpression(paramName, elementKey, evaluationContext);
+                        //获取方法返回值
                         String apply = customFunctionService.apply(funcName, value == null ? null : value.toString());
-                        map.put(getFunctionMapKey(funcName, paramName), apply);
+                        //替换后存入map
                         String str = matcher.replaceAll(apply);
                         map.put(template, str);
                     }
@@ -99,7 +105,6 @@ public class LogSpelProcess {
                 }
             }
         }
-
         return map;
     }
 
@@ -140,17 +145,4 @@ public class LogSpelProcess {
         }
         return spelValues;
     }
-
-
-    /**
-     * 获取前置函数映射的 key
-     *
-     * @param funcName
-     * @param param
-     * @return
-     */
-    private String getFunctionMapKey(String funcName, String param) {
-        return funcName + param;
-    }
-
 }
