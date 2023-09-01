@@ -19,11 +19,6 @@ public class OperateLogDTO {
     private String operator;
 
     /**
-     * 操作方式
-     */
-    private String type;
-
-    /**
      * 关联的业务id(订单号、业务编号)
      */
     private String bizNo;

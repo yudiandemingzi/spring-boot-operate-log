@@ -105,7 +105,6 @@ public class OperateLogAspect {
         //解析三目运算
         HashMap<String, String> process = logSpelProcess.ternaryProcess(processMap, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
-        logDTO.setType(annotation.type().getName());
         logDTO.setOperator(userService.getUserName());
         logDTO.setBizNo(process.get(annotation.bizNo()));
         logDTO.setOperateName(process.get(annotation.operateName()));

@@ -1,8 +1,6 @@
 package com.zhuangpo.operate.log.core.aop;
 
 
-import com.zhuangpo.operate.log.core.enums.OperateEnum;
-
 import java.lang.annotation.*;
 
 /**
@@ -21,12 +19,7 @@ public @interface OperateLog {
      * 操作者
      */
     String operator() default "";
-
-    /**
-     * 操作方式
-     */
-    OperateEnum type() default OperateEnum.UNKNOWN;
-
+    
     /**
      * 关联的业务id(订单号、业务编号)
      */
