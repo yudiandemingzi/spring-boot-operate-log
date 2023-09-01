@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -24,20 +26,17 @@ import java.util.regex.Pattern;
  * @since 2023/9/1 上午9:22
  */
 @Slf4j
+@Component
 public class LogSpelProcess {
 
     private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("\\{(.*?)}");
 
     private static final Pattern PATTERN_METHOD = Pattern.compile("\\[(.*?)]");
 
+    @Autowired
     private FunctionService customFunctionService;
 
     private final OperateLogExpressionEvaluator cachedExpressionEvaluator = new OperateLogExpressionEvaluator();
-
-    public LogSpelProcess(FunctionService customFunctionService) {
-        this.customFunctionService = customFunctionService;
-    }
-
 
     /**
      * key 为字段未SPEL解析属性, value为已解析的属性，如果解析失败依旧是未解析属性

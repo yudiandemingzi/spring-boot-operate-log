@@ -16,6 +16,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -32,20 +34,16 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Aspect
+@Component
 public class OperateLogAspect {
 
+    @Autowired
     private RecordLogService recordLogService;
-
+    @Autowired
     private UserService userService;
-
+    @Autowired
     private LogSpelProcess logSpelProcess;
-
-    public OperateLogAspect(LogSpelProcess logSpelProcess, RecordLogService recordLogService, UserService userService) {
-        this.recordLogService = recordLogService;
-        this.logSpelProcess = logSpelProcess;
-        this.userService = userService;
-    }
-
+    
     /**
      * 定义切点
      */

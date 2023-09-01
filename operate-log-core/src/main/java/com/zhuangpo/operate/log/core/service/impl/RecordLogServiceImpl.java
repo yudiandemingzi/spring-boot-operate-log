@@ -4,7 +4,7 @@ package com.zhuangpo.operate.log.core.service.impl;
 import com.zhuangpo.operate.log.core.pojo.OperateLogDTO;
 import com.zhuangpo.operate.log.core.service.RecordLogService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * 获取操作人信息
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
  * @since 2023/8/2 上午9:30
  */
 @Slf4j
+@Component
 public class RecordLogServiceImpl implements RecordLogService {
 
 
