@@ -4,8 +4,7 @@ package com.zhuangpo.operate.log.core.aop;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.zhuangpo.operate.log.core.handle.OperateLogExpressionEvaluator;
+import com.zhuangpo.operate.log.core.custom.LogSpelProcess;
 import com.zhuangpo.operate.log.core.pojo.OperateLogDTO;
 import com.zhuangpo.operate.log.core.service.RecordLogService;
 import com.zhuangpo.operate.log.core.service.UserService;
@@ -17,15 +16,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.expression.AnnotatedElementKey;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -39,15 +35,17 @@ import java.util.stream.Collectors;
 @Slf4j
 @Aspect
 @Component
-public class LogAspect {
+public class OperateLogAspect {
 
-    private OperateLogExpressionEvaluator expressionEvaluator = new OperateLogExpressionEvaluator();
 
     @Autowired
     private RecordLogService recordLogService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LogSpelProcess logSpelProcess;
 
     /**
      * 定义切点
@@ -89,6 +87,7 @@ public class LogAspect {
             operateLogDTO.setStatus(Boolean.FALSE);
             operateLogDTO.setErrMsg(message);
         }
+        //异步存储，这里用默认线程池，也可以自定义线程池
         CompletableFuture.runAsync(() ->
                 recordLogService.insertLog(operateLogDTO)
         );
@@ -104,46 +103,16 @@ public class LogAspect {
         //获取存在Spel表达式的属性
         List<String> templates = Lists.newArrayList(annotation.operator(), annotation.operateName(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
-        Map<String, String> process = this.process(templates, joinPoint);
+        HashMap<String, String> process = logSpelProcess.processBeforeExec(templates, joinPoint);
+        process = logSpelProcess.ternaryProcess(process, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
         logDTO.setType(annotation.type().getName());
-        logDTO.setOperator(process.get(annotation.operator()));
+        logDTO.setOperator(userService.getUserName());
         logDTO.setBizNo(process.get(annotation.bizNo()));
         logDTO.setOperateName(process.get(annotation.operateName()));
         logDTO.setOperateContent(process.get(annotation.operateContent()));
         return logDTO;
     }
 
-    /**
-     * key 为字段未SPEL解析属性, value为已解析的属性，如果解析失败依旧是未解析属性
-     * <p>
-     * 这里巧妙在 spelValues.put(tpl, tpl);后期如果解析失败那获取的是未解析成功或者不需要解析的属性
-     *
-     * @param templates 需要解析的属性
-     * @param joinPoint 切面
-     * @return 已经解析过的map
-     */
-    private Map<String, String> process(List<String> templates,
-                                        ProceedingJoinPoint joinPoint
-    ) {
-        Map<String, String> spelValues = Maps.newHashMap();
-        // 获取切点方法上的注解
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        Method method = methodSignature.getMethod();
-        Object[] args = joinPoint.getArgs();
-        Object target = joinPoint.getTarget();
-        Class<?> targetClass = AopUtils.getTargetClass(target);
-        EvaluationContext evaluationContext = expressionEvaluator.createEvaluationContext(targetClass, method, args);
-        for (String tpl : templates) {
-            spelValues.put(tpl, tpl);
-            try {
-                AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(method, targetClass);
-                String value = expressionEvaluator.parseExpression(evaluationContext, annotatedElementKey, tpl);
-                spelValues.put(tpl, value);
-            } catch (Exception e) {
-                log.info("解析操作日志SpEL出错 ={}", e.getMessage());
-            }
-        }
-        return spelValues;
-    }
+
 }

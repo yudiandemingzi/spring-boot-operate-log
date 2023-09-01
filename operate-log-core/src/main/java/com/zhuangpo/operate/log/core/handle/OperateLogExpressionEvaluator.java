@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  用于计算和缓存SpEL表达式的共享实用程序类
- * 
+ * 用于计算和缓存SpEL表达式的共享实用程序类
+ *
  * @author xub
  * @since 2023/8/29 下午2:53
  */
@@ -21,18 +21,20 @@ public class OperateLogExpressionEvaluator extends CachedExpressionEvaluator {
 
     private Map<CachedExpressionEvaluator.ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>();
     private Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<>();
-
+    private final Map<ExpressionKey, Expression> keyCache = new ConcurrentHashMap<>(64);
 
     public EvaluationContext createEvaluationContext(Class<?> targetClass, Method method, Object[] args) {
         Method targetMethod = getTargetMethod(targetClass, method);
         return new MethodBasedEvaluationContext(null, targetMethod, args, getParameterNameDiscoverer());
     }
 
-
+    
     public String parseExpression(EvaluationContext evaluationContext, AnnotatedElementKey methodKey, String conditionExpression) {
         return getExpression(this.expressionCache, methodKey, conditionExpression).getValue(evaluationContext, String.class);
     }
-
+    public Object parseExpression(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+        return this.getExpression(this.keyCache, methodKey, expression).getValue(evalContext);
+    }
 
     private Method getTargetMethod(Class<?> targetClass, Method method) {
         AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
