@@ -91,14 +91,14 @@ public class LogSpelProcess {
             String str = map.get(template);
             if (str.contains("{")) {
                 Matcher matcher = PATTERN_ATTRIBUTE.matcher(str);
-                StringBuffer parsedStr = new StringBuffer();
-                //匹配到字符串中的 {*{*}}
+                StringBuffer bufferStr = new StringBuffer();
                 while (matcher.find()) {
                     String paramName = matcher.group(1);
                     Object value = cachedExpressionEvaluator.parseExpression(paramName, elementKey, evaluationContext);
-                    String s = matcher.replaceAll(String.valueOf(value));
-                    map.put(template, s);
+                    matcher.appendReplacement(bufferStr, value.toString());
                 }
+                matcher.appendTail(bufferStr);
+                map.put(template, bufferStr.toString());
             }
         }
         return map;
