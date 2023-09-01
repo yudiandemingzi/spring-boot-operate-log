@@ -9,13 +9,6 @@ package com.zhuangpo.operate.log.core.custom;
 public interface CustomFunction {
 
     /**
-     * 目标方法执行前 执行自定义函数
-     *
-     * @return 是否执行前的函数
-     */
-    boolean executeBefore();
-
-    /**
      * 自定义函数名
      *
      * @return 自定义函数名
@@ -23,7 +16,7 @@ public interface CustomFunction {
     String functionName();
 
     /**
-     * 自定义函数
+     * 最终执行的方法
      *
      * @param param 参数
      * @return 执行结果

@@ -2,6 +2,10 @@ package com.zhuangpo.operate.log.core.config;
 
 
 import com.zhuangpo.operate.log.core.custom.*;
+import com.zhuangpo.operate.log.core.service.RecordLogService;
+import com.zhuangpo.operate.log.core.service.UserService;
+import com.zhuangpo.operate.log.core.service.impl.RecordLogServiceImpl;
+import com.zhuangpo.operate.log.core.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,9 +38,18 @@ public class LogAutoConfiguration {
     }
 
     @Bean
-    public IFunctionService customFunctionService(CustomFunctionFactory customFunctionFactory) {
+    public FunctionService customFunctionService(CustomFunctionFactory customFunctionFactory) {
         return new DefaultFunctionServiceImpl(customFunctionFactory);
     }
+    
+   @Bean
+    public RecordLogService recordLogService() {
+        return new RecordLogServiceImpl();
+    }
 
+    @Bean
+    public UserService userService() {
+        return new UserServiceImpl();
+    }
 
 }

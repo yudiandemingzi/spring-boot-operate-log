@@ -2,7 +2,6 @@ package com.zhuangpo.operate.log.core.service.impl;
 
 
 import com.zhuangpo.operate.log.core.service.UserService;
-import org.springframework.stereotype.Service;
 
 /**
  * 获取操作人信息
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
  * @author xub
  * @since 2023/8/2 上午9:30
  */
-@Service
 public class UserServiceImpl implements UserService {
     
     @Override

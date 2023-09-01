@@ -8,10 +8,7 @@ package com.zhuangpo.operate.log.core.custom;
  * @since 2023/9/1 上午9:26
  */
 public class DefaultCustomFunction implements CustomFunction {
-    @Override
-    public boolean executeBefore() {
-        return false;
-    }
+ 
 
     @Override
     public String functionName() {

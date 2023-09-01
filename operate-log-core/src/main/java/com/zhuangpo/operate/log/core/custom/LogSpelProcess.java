@@ -35,7 +35,7 @@ public class LogSpelProcess {
     private static final Pattern PATTERN_METHOD = Pattern.compile("\\[(.*?)]");
 
     @Autowired
-    private IFunctionService customFunctionService;
+    private FunctionService customFunctionService;
 
     private final OperateLogExpressionEvaluator cachedExpressionEvaluator = new OperateLogExpressionEvaluator();
 

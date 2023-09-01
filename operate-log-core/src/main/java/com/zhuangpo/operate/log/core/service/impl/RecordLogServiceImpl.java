@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
  * @since 2023/8/2 上午9:30
  */
 @Slf4j
-@Service
 public class RecordLogServiceImpl implements RecordLogService {
 
 

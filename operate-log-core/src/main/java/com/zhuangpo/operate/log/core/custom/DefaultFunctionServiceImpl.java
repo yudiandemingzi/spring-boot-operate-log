@@ -7,7 +7,7 @@ package com.zhuangpo.operate.log.core.custom;
  * @author xub
  * @since 2023/8/30 下午3:58
  */
-public class DefaultFunctionServiceImpl implements IFunctionService {
+public class DefaultFunctionServiceImpl implements FunctionService {
 
     private final CustomFunctionFactory customFunctionFactory;
 
@@ -27,6 +27,6 @@ public class DefaultFunctionServiceImpl implements IFunctionService {
     @Override
     public boolean executeBefore(String functionName) {
         CustomFunction function = customFunctionFactory.getFunction(functionName);
-        return function != null && function.executeBefore();
+        return function != null;
     }
 }
