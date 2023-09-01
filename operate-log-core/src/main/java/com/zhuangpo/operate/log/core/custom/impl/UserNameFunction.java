@@ -1,5 +1,7 @@
-package com.zhuangpo.operate.log.core.custom;
+package com.zhuangpo.operate.log.core.custom.impl;
 
+import com.zhuangpo.operate.log.core.custom.CustomFunction;
+import com.zhuangpo.operate.log.core.enums.FunctionNameEnum;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +15,7 @@ public class UserNameFunction implements CustomFunction {
 
     @Override
     public String functionName() {
-        return "getUserNameByUserId";
+        return FunctionNameEnum.GET_USERNAME_BY_USERID.getName();
     }
 
     @Override

@@ -1,13 +1,12 @@
-package com.zhuangpo.operate.log.core.custom;
+package com.zhuangpo.operate.log.core.handle;
 
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
-import com.zhuangpo.operate.log.core.handle.OperateLogExpressionEvaluator;
+import com.zhuangpo.operate.log.core.custom.FunctionService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.stereotype.Service;
@@ -29,16 +28,19 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class LogSpelProcess {
-    
+
     private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("\\{(.*?)}");
 
     private static final Pattern PATTERN_METHOD = Pattern.compile("\\[(.*?)]");
 
-    @Autowired
     private FunctionService customFunctionService;
 
     private final OperateLogExpressionEvaluator cachedExpressionEvaluator = new OperateLogExpressionEvaluator();
 
+    public LogSpelProcess(FunctionService customFunctionService) {
+        this.customFunctionService = customFunctionService;
+    }
+    
 
     /**
      * key 为字段未SPEL解析属性, value为已解析的属性，如果解析失败依旧是未解析属性
@@ -110,7 +112,7 @@ public class LogSpelProcess {
      * @return 已经解析过的map
      */
     public HashMap<String, String> ternaryProcess(HashMap<String, String> map,
-                                           ProceedingJoinPoint joinPoint
+                                                  ProceedingJoinPoint joinPoint
     ) {
         HashMap<String, String> spelValues = Maps.newHashMap();
         // 获取切点方法上的注解

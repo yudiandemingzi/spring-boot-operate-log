@@ -1,4 +1,6 @@
-package com.zhuangpo.operate.log.core.custom;
+package com.zhuangpo.operate.log.core.handle;
+
+import com.zhuangpo.operate.log.core.custom.CustomFunction;
 
 import java.util.List;
 import java.util.Map;
