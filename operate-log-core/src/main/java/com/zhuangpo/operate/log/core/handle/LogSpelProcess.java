@@ -1,7 +1,6 @@
 package com.zhuangpo.operate.log.core.handle;
 
 import cn.hutool.core.util.StrUtil;
-import com.google.common.collect.Maps;
 import com.zhuangpo.operate.log.core.custom.FunctionService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -9,7 +8,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -26,7 +24,6 @@ import java.util.regex.Pattern;
  * @since 2023/9/1 上午9:22
  */
 @Slf4j
-@Service
 public class LogSpelProcess {
 
     private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("\\{(.*?)}");
@@ -119,7 +116,6 @@ public class LogSpelProcess {
     public HashMap<String, String> ternaryProcess(HashMap<String, String> map,
                                                   ProceedingJoinPoint joinPoint
     ) {
-        HashMap<String, String> spelValues = Maps.newHashMap();
         // 获取切点方法上的注解
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
@@ -134,15 +130,14 @@ public class LogSpelProcess {
                 continue;
             }
             String value = entry.getValue();
-            spelValues.put(key, value);
             try {
                 AnnotatedElementKey annotatedElementKey = new AnnotatedElementKey(method, targetClass);
                 value = cachedExpressionEvaluator.parseExpression(evaluationContext, annotatedElementKey, value);
-                spelValues.put(key, value);
+                map.put(key, value);
             } catch (Exception e) {
                 log.info("解析操作日志SpEL出错 ={}", e.getMessage());
             }
         }
-        return spelValues;
+        return map;
     }
 }

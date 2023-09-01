@@ -102,7 +102,9 @@ public class OperateLogAspect {
         //获取存在Spel表达式的属性
         List<String> templates = Lists.newArrayList(annotation.operator(), annotation.operateName(), annotation.bizNo(), annotation.operateContent());
         templates = templates.stream().filter(e -> StringUtils.isNotBlank(e)).collect(Collectors.toList());
+        //解析SPEL属性和方法
         HashMap<String, String> processMap = logSpelProcess.processBeforeExec(templates, joinPoint);
+        //解析三目运算
         HashMap<String, String> process = logSpelProcess.ternaryProcess(processMap, joinPoint);
         OperateLogDTO logDTO = new OperateLogDTO();
         logDTO.setType(annotation.type().getName());
@@ -114,4 +116,8 @@ public class OperateLogAspect {
     }
 
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }
