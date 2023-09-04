@@ -2,7 +2,7 @@
 /logs/
 /dubbo/
 /**/*.iml
-/**/test/**/*.java
+
 
 target/
 data/
